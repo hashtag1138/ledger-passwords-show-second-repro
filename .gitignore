@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+*.swp
+.DS_Store
+
+artifacts/build/*
+!artifacts/build/.gitkeep
+artifacts/logs/*
+!artifacts/logs/.gitkeep
+artifacts/reports/*
+!artifacts/reports/.gitkeep
+
+third_party/app-passwords-upstream/

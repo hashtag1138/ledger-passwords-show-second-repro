@@ -1,0 +1,33 @@
+diff --git a/src/ui/ui_passwords.c b/src/ui/ui_passwords.c
+index ce9c3d1..1b1a847 100644
+--- a/src/ui/ui_passwords.c
++++ b/src/ui/ui_passwords.c
+@@ -54,7 +54,6 @@ static char password_name[MAX_METANAME + 1] = {0};
+ 
+ static nbgl_genericContents_t genericContent = {0};
+ static nbgl_content_t contentsList = {0};
+-static size_t nbPasswordsPerPage = 0;
+ 
+ /**
+  * @brief Delete error message
+@@ -183,8 +182,9 @@ void confirm_all_passwords_deletion(void) {
+  */
+ static void password_callback(const int token, const uint8_t index, int page) {
+     UNUSED(token);
++    UNUSED(page);
+     if (selector_callback) {
+-        selector_callback((page * nbPasswordsPerPage) + index);
++        selector_callback(index);
+     }
+ }
+ 
+@@ -225,9 +225,6 @@ void display_password_list(void) {
+     contentsList.content.choicesList.tuneId = TUNE_TAP_CASUAL;
+ #endif
+     contentsList.contentActionCallback = &password_callback;
+-    nbPasswordsPerPage =
+-        nbgl_useCaseGetNbChoicesInPage(nbPasswords, &contentsList.content.choicesList, 0, false);
+-
+     nbgl_useCaseGenericConfiguration("Passwords list", 0, &genericContent, display_choice_page);
+ }
+ 

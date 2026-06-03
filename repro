@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+usage() {
+    cat <<'EOF'
+Usage:
+  ./repro build
+  ./repro test
+  ./repro all
+  ./repro clean
+
+Commands:
+  build   Clone upstream app-passwords at the pinned commit, build original and patched variants.
+  test    Run the full regression suite on original and patched variants via Speculos.
+  all     Run build, then test.
+  clean   Remove generated build, log, and report artifacts.
+EOF
+}
+
+command_name="${1:-help}"
+if [[ $# -gt 0 ]]; then
+    shift
+fi
+
+case "$command_name" in
+    build)
+        exec python3 "$ROOT_DIR/scripts/build.py" "$@"
+        ;;
+    test)
+        exec python3 "$ROOT_DIR/scripts/test.py" "$@"
+        ;;
+    all)
+        python3 "$ROOT_DIR/scripts/build.py" "$@"
+        exec python3 "$ROOT_DIR/scripts/test.py"
+        ;;
+    clean)
+        rm -rf "$ROOT_DIR/artifacts/build"/*
+        rm -rf "$ROOT_DIR/artifacts/logs"/*
+        rm -rf "$ROOT_DIR/artifacts/reports"/*
+        mkdir -p "$ROOT_DIR/artifacts/build" "$ROOT_DIR/artifacts/logs" "$ROOT_DIR/artifacts/reports"
+        ;;
+    help|-h|--help)
+        usage
+        ;;
+    *)
+        echo "Unknown command: $command_name" >&2
+        usage >&2
+        exit 1
+        ;;
+esac

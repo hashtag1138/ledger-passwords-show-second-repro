@@ -1,0 +1,25 @@
+{
+  "app_passwords": {
+    "repo": "https://github.com/LedgerHQ/app-passwords.git",
+    "commit": "000f938a3fa8a045e9b31169f4592251a4758722"
+  },
+  "docker_images": {
+    "builder": "ghcr.io/ledgerhq/ledger-app-builder/ledger-app-dev-tools@sha256:adb8166bbad90a7803bab624e056aa1e48d7dc2b2bf5c592d7a9ef2e123d962c",
+    "speculos": "ghcr.io/ledgerhq/speculos@sha256:9b414c3bcaecb7638224156d36a702d66af812a0aa59ca203ce7b34cf4d590ca"
+  },
+  "speculos": {
+    "model": "nanosp",
+    "display": "headless",
+    "app_name": "Passwords:0.0.0"
+  },
+  "build": {
+    "make_flags": [
+      "TESTING=1"
+    ],
+    "populate": false
+  },
+  "metadata_defaults": {
+    "charset_mask": 255,
+    "nickname_max_utf8_bytes": 19
+  }
+}

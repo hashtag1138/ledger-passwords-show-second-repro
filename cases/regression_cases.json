@@ -1,0 +1,46 @@
+[
+  {
+    "id": "control_push_single_show_first",
+    "description": "Charge un vault valide avec un seul identifiant via APDU, puis affiche le premier item.",
+    "mode": "push_show",
+    "entries": [
+      "sofian terki"
+    ],
+    "position": 1,
+    "expected_selected": "sofian terki",
+    "expect": {
+      "original": "ok",
+      "patched": "ok"
+    }
+  },
+  {
+    "id": "crash_push_two_entries_show_second",
+    "description": "Charge deux metadata valides via APDU, puis affiche le second item.",
+    "mode": "push_show",
+    "entries": [
+      "alpha",
+      "beta"
+    ],
+    "position": 2,
+    "expected_selected": "beta",
+    "expect": {
+      "original": "crash",
+      "patched": "ok"
+    }
+  },
+  {
+    "id": "crash_ui_only_two_entries_type_show_second",
+    "description": "Crée deux identifiants uniquement via l'UI, type le second puis show le second.",
+    "mode": "ui_create_type_show",
+    "entries": [
+      "a",
+      "b"
+    ],
+    "position": 2,
+    "expected_selected": "b",
+    "expect": {
+      "original": "crash",
+      "patched": "ok"
+    }
+  }
+]
