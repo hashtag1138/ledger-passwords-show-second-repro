@@ -1,36 +1,36 @@
-# Cause racine
+# Root cause
 
 ## Verdict
 
-Le crash `show second` vient de `app-passwords`, pas du companion.
+The `show second` crash comes from `app-passwords`, not from the companion.
 
-## Point causal
+## Causal point
 
-Le bug est dans `src/ui/ui_passwords.c`, dans `password_callback()`.
+The bug is in `src/ui/ui_passwords.c`, inside `password_callback()`.
 
-Le callback faisait :
+The callback used to do:
 
 ```c
 selector_callback((page * nbPasswordsPerPage) + index);
 ```
 
-Sur Nano / Speculos, pour cette `CHOICES_LIST`, `index` est déjà absolu. La translation était donc appliquée deux fois.
+On Nano / Speculos, for this `CHOICES_LIST`, `index` is already absolute. The translation was therefore applied twice.
 
-## Effet
+## Effect
 
-Pour une liste à deux entrées :
+For a two-entry list:
 
-- premier item : `index = 0`, le calcul reste `0`
-- second item : `index = 1`, le calcul devient `2`
+- first item: `index = 0`, the calculation remains `0`
+- second item: `index = 1`, the calculation becomes `2`
 
-L'app lit alors hors de la liste logique, ce qui suffit à casser `show_password_cb()` sur le second item.
+The app then reads outside the logical list, which is enough to break `show_password_cb()` on the second item.
 
-## Pourquoi le companion n'est pas requis
+## Why the companion is not required
 
-La repro `device-only` du repo montre que le crash apparaît aussi sans aucune interaction avec le companion :
+The repository's `device-only` reproduction shows that the crash also appears without any interaction with the companion:
 
-- création de deux entrées via l'UI du Ledger
-- `type` du second : OK
-- `show` du second : crash sur `original`
+- creation of two entries through the Ledger UI
+- `type` on the second: OK
+- `show` on the second: crash on `original`
 
-Le companion ne faisait que pousser un état valide que l'app device gérait mal ensuite.
+The companion was only pushing a valid state that the device app mishandled afterwards.

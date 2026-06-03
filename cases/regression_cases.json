@@ -1,7 +1,7 @@
 [
   {
     "id": "control_push_single_show_first",
-    "description": "Charge un vault valide avec un seul identifiant via APDU, puis affiche le premier item.",
+    "description": "Loads a valid vault with a single identifier via APDU, then shows the first item.",
     "mode": "push_show",
     "entries": [
       "sofian terki"
@@ -15,7 +15,7 @@
   },
   {
     "id": "crash_push_two_entries_show_second",
-    "description": "Charge deux metadata valides via APDU, puis affiche le second item.",
+    "description": "Loads two valid metadata entries via APDU, then shows the second item.",
     "mode": "push_show",
     "entries": [
       "alpha",
@@ -30,7 +30,7 @@
   },
   {
     "id": "crash_ui_only_two_entries_type_show_second",
-    "description": "Crée deux identifiants uniquement via l'UI, type le second puis show le second.",
+    "description": "Creates two identifiers through the device UI only, types the second, then shows the second.",
     "mode": "ui_create_type_show",
     "entries": [
       "a",

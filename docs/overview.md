@@ -1,24 +1,24 @@
-# Vue d'ensemble
+# Overview
 
-Ce repo autonome est organisé pour répondre à quatre besoins :
+This autonomous repository is organized around four goals:
 
-1. builder l'app upstream originale ;
-2. builder la même app avec un patch minimal ;
-3. reproduire le crash sur `original` ;
-4. démontrer que le patch supprime le crash sur `patched`.
+1. build the original upstream app;
+2. build the same app with a minimal patch;
+3. reproduce the crash on `original`;
+4. demonstrate that the patch removes the crash on `patched`.
 
-## Structure utile
+## Useful structure
 
-- `repro` : point d'entrée unique
-- `repro.lock.json` : commit upstream et images Docker figés
-- `cases/regression_cases.json` : scénarios de test
-- `patches/app-passwords/` : patch et doc du patch
-- `scripts/build.py` : build original + patched
-- `scripts/test.py` : repro complète + rapport
-- `scripts/speculos_harness.py` : pilotage Speculos et UI Nano
-- `artifacts/` : tout le généré
+- `repro`: single entry point
+- `repro.lock.json`: pinned upstream commit and Docker images
+- `cases/regression_cases.json`: test scenarios
+- `patches/app-passwords/`: patch and patch documentation
+- `scripts/build.py`: original + patched build
+- `scripts/test.py`: full reproduction + report
+- `scripts/speculos_harness.py`: Speculos and Nano UI automation
+- `artifacts/`: all generated outputs
 
-## Variantes construites
+## Built variants
 
-- `original` : checkout upstream inchangé
-- `patched` : checkout upstream + patch `show second`
+- `original`: unchanged upstream checkout
+- `patched`: upstream checkout + `show second` patch

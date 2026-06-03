@@ -156,7 +156,7 @@ def render_markdown_report(
     results: list[dict[str, Any]],
 ) -> str:
     lines = [
-        "# Rapport de reproduction `show second`",
+        "# `show second` reproduction report",
         "",
         f"- run id: `{run_id}`",
         f"- upstream repo: `{build_manifest['upstream_repo']}`",
@@ -164,14 +164,14 @@ def render_markdown_report(
         f"- builder image: `{build_manifest['builder_image']}`",
         f"- speculos image: `{build_manifest['speculos_image']}`",
         "",
-        "## Commandes",
+        "## Commands",
         "",
         "```bash",
         "./repro build",
         "./repro test",
         "```",
         "",
-        "## Résultats",
+        "## Results",
         "",
         "| Variant | Case | Expected | Actual | Pass | Selected |",
         "| --- | --- | --- | --- | --- | --- |",
@@ -186,7 +186,7 @@ def render_markdown_report(
     lines.extend(
         [
             "",
-            "## Détails",
+            "## Details",
             "",
         ]
     )

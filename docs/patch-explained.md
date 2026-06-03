@@ -1,27 +1,27 @@
-# Patch expliqué
+# Patch explained
 
-## Intention
+## Intent
 
-Le patch ne touche ni au moteur de génération de mot de passe, ni au format des metadata, ni au rendu NBGL. Il corrige uniquement l'index transmis au callback de sélection.
+The patch does not touch the password generation engine, the metadata format, or NBGL rendering. It only fixes the index passed to the selection callback.
 
-## Avant
+## Before
 
-- l'app stockait `nbPasswordsPerPage`
-- au moment de la sélection, elle recalculait un index avec `page * nbPasswordsPerPage + index`
+- the app stored `nbPasswordsPerPage`
+- at selection time, it recomputed an index with `page * nbPasswordsPerPage + index`
 
-Ce schéma est valide seulement si `index` est relatif à la page. Ce n'est pas le cas ici.
+This scheme is valid only if `index` is page-relative. That is not the case here.
 
-## Après
+## After
 
-- `page` devient inutilisé
-- l'app transmet directement `index`
-- `nbPasswordsPerPage` n'est plus nécessaire
+- `page` becomes unused
+- the app passes `index` directly
+- `nbPasswordsPerPage` is no longer needed
 
-## Pourquoi c'est le bon niveau de fix
+## Why this is the right fix level
 
-- le reproducer minimal disparaît
-- le contrôle mono-entrée reste OK
-- la repro `device-only` disparaît aussi
-- le diff est petit et local
+- the minimal reproducer disappears
+- the single-entry control remains OK
+- the `device-only` reproduction disappears as well
+- the diff is small and local
 
-Le patch est donc reviewable rapidement côté upstream.
+This makes the patch fast to review upstream.

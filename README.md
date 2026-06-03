@@ -1,58 +1,58 @@
 # ledger-passwords-show-second-repro
 
-Repo autonome pour reproduire, documenter et valider le correctif du crash `show second` dans `LedgerHQ/app-passwords`.
+Autonomous repository to reproduce, document, and validate the `show second` crash fix in `LedgerHQ/app-passwords`.
 
-## Objectif
+## Goal
 
-Ce repo :
+This repository:
 
-- clone `LedgerHQ/app-passwords` à un commit figé ;
-- build une variante `original` et une variante `patched` ;
-- lance Speculos ;
-- exécute des scénarios de repro `push-style` et `device-only` ;
-- génère un rapport unique comparant `original` vs `patched`.
+- clones `LedgerHQ/app-passwords` at a pinned commit;
+- builds an `original` variant and a `patched` variant;
+- launches Speculos;
+- runs `push-style` and `device-only` reproduction scenarios;
+- generates a single report comparing `original` vs `patched`.
 
-Le repo ne dépend pas du companion actuel pour pousser les metadata : les tests parlent directement APDU à Speculos, ce qui garde la repro simple et autonome.
+The repository does not depend on the current companion app to push metadata: the tests speak APDU directly to Speculos, which keeps the reproduction simple and self-contained.
 
-## Prérequis
+## Prerequisites
 
 - `git`
 - `docker`
 - `python3` >= `3.11`
 
-## Commandes
+## Commands
 
-Build :
+Build:
 
 ```bash
 ./repro build
 ```
 
-Test complet :
+Full test run:
 
 ```bash
 ./repro test
 ```
 
-Build + test :
+Build + test:
 
 ```bash
 ./repro all
 ```
 
-## Sorties
+## Outputs
 
-- build original : `artifacts/build/original/app-passwords/bin/app.elf`
-- build patché : `artifacts/build/patched/app-passwords/bin/app.elf`
-- manifest de build : `artifacts/build/manifest.json`
-- dernier rapport : `artifacts/reports/latest.md`
-- dernier rapport JSON : `artifacts/reports/latest.json`
-- logs Speculos : `artifacts/logs/<run-id>/`
+- original build: `artifacts/build/original/app-passwords/bin/app.elf`
+- patched build: `artifacts/build/patched/app-passwords/bin/app.elf`
+- build manifest: `artifacts/build/manifest.json`
+- latest report: `artifacts/reports/latest.md`
+- latest JSON report: `artifacts/reports/latest.json`
+- Speculos logs: `artifacts/logs/<run-id>/`
 
 ## Documentation
 
-- vue d’ensemble : `docs/overview.md`
-- reproduction : `docs/reproduction.md`
-- cause racine : `docs/root-cause.md`
-- patch expliqué : `docs/patch-explained.md`
-- patch prêt à appliquer : `patches/app-passwords/0001-fix-show-second-index.patch`
+- overview: `docs/overview.md`
+- reproduction: `docs/reproduction.md`
+- root cause: `docs/root-cause.md`
+- patch explained: `docs/patch-explained.md`
+- ready-to-apply patch: `patches/app-passwords/0001-fix-show-second-index.patch`

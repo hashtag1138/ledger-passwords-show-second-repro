@@ -1,38 +1,38 @@
-# Patch `show second`
+# `show second` patch
 
-## Fichier
+## File
 
-- patch : `0001-fix-show-second-index.patch`
+- patch: `0001-fix-show-second-index.patch`
 
-## Ce que fait le patch
+## What the patch does
 
-Le patch corrige la sélection d'un item dans `Passwords list` sur Nano / Speculos.
+The patch fixes item selection in `Passwords list` on Nano / Speculos.
 
-Avant :
+Before:
 
-- `password_callback()` recalculait un index absolu avec `page * nbPasswordsPerPage + index`
+- `password_callback()` recomputed an absolute index with `page * nbPasswordsPerPage + index`
 
-Après :
+After:
 
-- `password_callback()` transmet directement `index`
+- `password_callback()` passes `index` directly
 
-## Pourquoi
+## Why
 
-Sur Nano, le callback de `CHOICES_LIST` reçoit déjà l'index absolu de l'item sélectionné. Le recalcul appliquait donc une seconde translation.
+On Nano, the `CHOICES_LIST` callback already receives the absolute index of the selected item. The recomputation therefore applied a second translation.
 
-Conséquence sur une liste à deux entrées :
+Effect on a two-entry list:
 
-- premier item : `0` -> OK
-- second item : `2` -> hors borne
+- first item: `0` -> OK
+- second item: `2` -> out of bounds
 
-Cela suffisait à faire lire un pointeur invalide dans `show_password_cb()`, puis à finir en crash `signal 11`.
+That was enough to make `show_password_cb()` read an invalid pointer and eventually crash with `signal 11`.
 
-## Comment l'appliquer manuellement
+## How to apply it manually
 
-Depuis un checkout de `LedgerHQ/app-passwords` au commit figé par `repro.lock.json` :
+From a `LedgerHQ/app-passwords` checkout at the commit pinned by `repro.lock.json`:
 
 ```bash
 git apply patches/app-passwords/0001-fix-show-second-index.patch
 ```
 
-Le repo applique automatiquement ce patch dans `./repro build`.
+The repository applies this patch automatically in `./repro build`.

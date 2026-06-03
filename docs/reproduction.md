@@ -1,44 +1,44 @@
 # Reproduction
 
-## Commandes
+## Commands
 
-Build :
+Build:
 
 ```bash
 ./repro build
 ```
 
-Repro complète :
+Full reproduction:
 
 ```bash
 ./repro test
 ```
 
-## Ce que fait `./repro build`
+## What `./repro build` does
 
-- clone `LedgerHQ/app-passwords` au commit figé
-- prépare deux worktrees sous `artifacts/build/`
-- applique le patch sur la variante `patched`
-- compile les deux variantes avec l'image Docker Ledger builder
+- clones `LedgerHQ/app-passwords` at the pinned commit
+- prepares two worktrees under `artifacts/build/`
+- applies the patch to the `patched` variant
+- compiles both variants with the Ledger builder Docker image
 
-## Ce que fait `./repro test`
+## What `./repro test` does
 
-- lance Speculos sur `original`
-- joue les cas de repro
-- relance Speculos sur `patched`
-- rejoue les mêmes cas
-- génère un rapport comparatif Markdown + JSON
+- launches Speculos on `original`
+- runs the reproduction cases
+- relaunches Speculos on `patched`
+- reruns the same cases
+- generates a comparative Markdown + JSON report
 
-## Cas couverts
+## Covered cases
 
-1. contrôle : un seul identifiant poussé via APDU, `show first`
-2. crash principal : deux identifiants valides poussés via APDU, `show second`
-3. preuve device-only : création UI-only de deux identifiants, `type second`, puis `show second`
+1. control: one identifier pushed via APDU, `show first`
+2. main crash: two valid identifiers pushed via APDU, `show second`
+3. device-only proof: UI-only creation of two identifiers, `type second`, then `show second`
 
-Le cas `device-only` automatisé utilise `a` et `b` pour rester stable côté clavier Nano piloté automatiquement. Le bug s'étend cependant au scénario réel `sofian terki` + `abc`, car la cause racine est une erreur d'indexation de liste et non le contenu des surnoms.
+The automated `device-only` case uses `a` and `b` to stay stable with automatically driven Nano keyboard input. The bug still extends to the real-world `sofian terki` + `abc` scenario, because the root cause is a list-indexing error rather than nickname content.
 
-## Sorties
+## Outputs
 
-- rapport Markdown : `artifacts/reports/latest.md`
-- rapport JSON : `artifacts/reports/latest.json`
-- logs bruts Speculos : `artifacts/logs/<run-id>/`
+- Markdown report: `artifacts/reports/latest.md`
+- JSON report: `artifacts/reports/latest.json`
+- raw Speculos logs: `artifacts/logs/<run-id>/`
