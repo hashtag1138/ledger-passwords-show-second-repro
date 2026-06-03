@@ -14,6 +14,12 @@ Full reproduction:
 ./repro test
 ```
 
+Install the patched app on a real Ledger:
+
+```bash
+scripts/load-passwords-app-real-device.sh --model nanosp
+```
+
 ## What `./repro build` does
 
 - clones `LedgerHQ/app-passwords` at the pinned commit
@@ -42,3 +48,12 @@ The automated `device-only` case uses `a` and `b` to stay stable with automatica
 - Markdown report: `artifacts/reports/latest.md`
 - JSON report: `artifacts/reports/latest.json`
 - raw Speculos logs: `artifacts/logs/<run-id>/`
+
+## Real-device install
+
+The Speculos reproduction flow and the real-device install flow are intentionally separate.
+
+- `./repro build` builds the pinned reproduction variants used by Speculos.
+- `scripts/load-passwords-app-real-device.sh` prepares a separate patched checkout and builds a real-device variant without `TESTING=1`.
+
+See `docs/install-on-ledger.md` for the real-device loading workflow.

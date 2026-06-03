@@ -14,6 +14,7 @@ This autonomous repository is organized around four goals:
 - `cases/regression_cases.json`: test scenarios
 - `patches/app-passwords/`: patch and patch documentation
 - `scripts/build.py`: original + patched build
+- `scripts/load-passwords-app-real-device.sh`: real-device build + load helper
 - `scripts/test.py`: full reproduction + report
 - `scripts/speculos_harness.py`: Speculos and Nano UI automation
 - `artifacts/`: all generated outputs

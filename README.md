@@ -40,6 +40,12 @@ Build + test:
 ./repro all
 ```
 
+Install the patched app on a real Ledger:
+
+```bash
+scripts/load-passwords-app-real-device.sh --model nanosp
+```
+
 ## Outputs
 
 - original build: `artifacts/build/original/app-passwords/bin/app.elf`
@@ -53,6 +59,7 @@ Build + test:
 
 - overview: `docs/overview.md`
 - reproduction: `docs/reproduction.md`
+- real-device installation: `docs/install-on-ledger.md`
 - root cause: `docs/root-cause.md`
 - patch explained: `docs/patch-explained.md`
 - ready-to-apply patch: `patches/app-passwords/0001-fix-show-second-index.patch`
