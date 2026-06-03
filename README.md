@@ -1,5 +1,7 @@
 # ledger-passwords-show-second-repro
 
+Companion repository: [`hashtag1138/ledger-password-companion-app`](https://github.com/hashtag1138/ledger-password-companion-app)
+
 Autonomous repository to reproduce, document, and validate the `show second` crash fix in `LedgerHQ/app-passwords`.
 
 ## Goal
@@ -46,6 +48,8 @@ Install the patched app on a real Ledger:
 scripts/load-passwords-app-real-device.sh --model nanosp
 ```
 
+See the full install guide: [`docs/install-on-ledger.md`](docs/install-on-ledger.md)
+
 ## Outputs
 
 - original build: `artifacts/build/original/app-passwords/bin/app.elf`
@@ -57,9 +61,9 @@ scripts/load-passwords-app-real-device.sh --model nanosp
 
 ## Documentation
 
-- overview: `docs/overview.md`
-- reproduction: `docs/reproduction.md`
-- real-device installation: `docs/install-on-ledger.md`
-- root cause: `docs/root-cause.md`
-- patch explained: `docs/patch-explained.md`
-- ready-to-apply patch: `patches/app-passwords/0001-fix-show-second-index.patch`
+- overview: [`docs/overview.md`](docs/overview.md)
+- reproduction: [`docs/reproduction.md`](docs/reproduction.md)
+- real-device installation: [`docs/install-on-ledger.md`](docs/install-on-ledger.md)
+- root cause: [`docs/root-cause.md`](docs/root-cause.md)
+- patch explained: [`docs/patch-explained.md`](docs/patch-explained.md)
+- ready-to-apply patch: [`patches/app-passwords/0001-fix-show-second-index.patch`](patches/app-passwords/0001-fix-show-second-index.patch)

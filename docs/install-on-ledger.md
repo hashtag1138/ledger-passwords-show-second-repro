@@ -46,6 +46,9 @@ scripts/load-passwords-app-real-device.sh --model nanosp --no-build
 scripts/load-passwords-app-real-device.sh --model nanosp --force
 ```
 
+Use `--sudo-docker` only when your user cannot talk to the Docker daemon itself.
+It is not the fix for the usual Ledger USB permission issue inside the container.
+
 ## What the script does
 
 The helper:
@@ -74,6 +77,72 @@ When things are healthy, the script should explicitly show:
 - the final `make load` command
 
 If the device is not detected, the script stops unless you pass `--force`.
+
+## Docker and USB permission troubleshooting
+
+The most common failure mode is:
+
+```text
+OSError: open failed
+```
+
+coming from `ledgerblue.loadApp` during `make load`.
+
+### Why this happens
+
+On many Linux hosts, the Ledger USB node under `/dev/bus/usb/...` is owned by `root`, for example:
+
+```text
+crw-rw-r-- 1 root root ... /dev/bus/usb/001/015
+```
+
+In that setup, a container process running as your host uid often cannot open the HID device even if:
+
+- Docker itself works correctly;
+- `lsusb` detects the Ledger;
+- the build phase succeeds.
+
+### What this repository does about it
+
+The helper intentionally splits the two phases:
+
+- the build phase runs as your host uid so generated files are not owned by `root`;
+- the `make load` phase runs as `root` inside the container so `ledgerblue` can open the real USB device.
+
+That is why the script can succeed even when manual Docker invocations fail with `open failed`.
+
+### When to use `--sudo-docker`
+
+Use:
+
+```bash
+scripts/load-passwords-app-real-device.sh --model nanosp --sudo-docker
+```
+
+only if Docker itself is inaccessible, for example when:
+
+- `docker version` fails with a daemon permission error;
+- your user is not allowed to access the Docker socket.
+
+`--sudo-docker` is about Docker daemon access.
+It is separate from the USB HID permission problem handled by running `make load` as root inside the container.
+
+### If `open failed` still appears
+
+Check these points in order:
+
+1. make sure Ledger Live is fully closed;
+2. keep the Ledger unlocked and on the dashboard;
+3. unplug and replug the Ledger, then rerun the script;
+4. rerun once with `--sudo-docker` if Docker access itself is flaky;
+5. confirm the Ledger is still visible with `lsusb -d 2c97:`.
+
+If the script says the Ledger is detected but `ledgerblue` still cannot open it, the issue is almost always host USB access contention or host policy around HID device access.
+
+### Running outside Docker
+
+If you later try to load the app without this helper and without Docker, you may need proper udev rules on the host so non-root processes can access the Ledger HID device.
+This repository does not manage host udev setup; it works around the common case by running the load step as root inside the container.
 
 ## After installation
 
