@@ -28,4 +28,4 @@ The companion app can then require `Passwords >= 1.3.2` before allowing real har
 
 The always-applied candidate patch is:
 
-- [patches/app-passwords/0000-bump-candidate-version-to-1.3.2.patch](/home/sofian/Sources/ledger-passwords-show-second-repro/patches/app-passwords/0000-bump-candidate-version-to-1.3.2.patch:1)
+- [patches/app-passwords/0000-bump-candidate-version-to-1.3.2.patch](../../patches/app-passwords/0000-bump-candidate-version-to-1.3.2.patch)

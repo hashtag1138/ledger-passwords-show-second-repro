@@ -1,16 +1,16 @@
 # `app-passwords` Patch Catalog
 
-This repository applies patches to the upstream `LedgerHQ/app-passwords` checkout selected by [repro.lock.json](/home/sofian/Sources/ledger-passwords-show-second-repro/repro.lock.json:1).
+This repository applies patches to the upstream `LedgerHQ/app-passwords` checkout selected by [repro.lock.json](../../repro.lock.json).
 
 The catalog driving fix selection is:
 
-- [patches/app-passwords/fix-catalog.json](/home/sofian/Sources/ledger-passwords-show-second-repro/patches/app-passwords/fix-catalog.json:1)
+- [patches/app-passwords/fix-catalog.json](fix-catalog.json)
 
 ## Always-Applied Candidate Patch
 
 Every candidate build also applies:
 
-- [0000-bump-candidate-version-to-1.3.2.patch](/home/sofian/Sources/ledger-passwords-show-second-repro/patches/app-passwords/0000-bump-candidate-version-to-1.3.2.patch:1)
+- [0000-bump-candidate-version-to-1.3.2.patch](0000-bump-candidate-version-to-1.3.2.patch)
 
 Purpose:
 
@@ -19,7 +19,7 @@ Purpose:
 
 Doc:
 
-- [docs/bugs/candidate-version-1.3.2.md](/home/sofian/Sources/ledger-passwords-show-second-repro/docs/bugs/candidate-version-1.3.2.md:1)
+- [docs/bugs/candidate-version-1.3.2.md](../../docs/bugs/candidate-version-1.3.2.md)
 
 ## Available Fixes
 
@@ -27,7 +27,7 @@ Doc:
 
 Patch:
 
-- [0001-fix-show-second-index.patch](/home/sofian/Sources/ledger-passwords-show-second-repro/patches/app-passwords/0001-fix-show-second-index.patch:1)
+- [0001-fix-show-second-index.patch](0001-fix-show-second-index.patch)
 
 Purpose:
 
@@ -35,14 +35,14 @@ Purpose:
 
 Docs:
 
-- [docs/root-cause.md](/home/sofian/Sources/ledger-passwords-show-second-repro/docs/root-cause.md:1)
-- [docs/patch-explained.md](/home/sofian/Sources/ledger-passwords-show-second-repro/docs/patch-explained.md:1)
+- [docs/root-cause.md](../../docs/root-cause.md)
+- [docs/patch-explained.md](../../docs/patch-explained.md)
 
 ### `azerty-right-alt`
 
 Patch:
 
-- [0002-use-right-alt-for-azerty-third-level.patch](/home/sofian/Sources/ledger-passwords-show-second-repro/patches/app-passwords/0002-use-right-alt-for-azerty-third-level.patch:1)
+- [0002-use-right-alt-for-azerty-third-level.patch](0002-use-right-alt-for-azerty-third-level.patch)
 
 Purpose:
 
@@ -50,8 +50,8 @@ Purpose:
 
 Docs:
 
-- [docs/bugs/azerty-right-alt.md](/home/sofian/Sources/ledger-passwords-show-second-repro/docs/bugs/azerty-right-alt.md:1)
-- [docs/plans/azerty-right-alt-implementation-plan.md](/home/sofian/Sources/ledger-passwords-show-second-repro/docs/plans/azerty-right-alt-implementation-plan.md:1)
+- [docs/bugs/azerty-right-alt.md](../../docs/bugs/azerty-right-alt.md)
+- [docs/plans/azerty-right-alt-implementation-plan.md](../../docs/plans/azerty-right-alt-implementation-plan.md)
 
 ## Build Examples
 

@@ -48,7 +48,7 @@ This repository freezes the following decision:
 
 The corresponding app patch is:
 
-- [patches/app-passwords/0002-use-right-alt-for-azerty-third-level.patch](/home/sofian/Sources/ledger-passwords-show-second-repro/patches/app-passwords/0002-use-right-alt-for-azerty-third-level.patch:1)
+- [patches/app-passwords/0002-use-right-alt-for-azerty-third-level.patch](../../patches/app-passwords/0002-use-right-alt-for-azerty-third-level.patch)
 
 ## Build Commands
 

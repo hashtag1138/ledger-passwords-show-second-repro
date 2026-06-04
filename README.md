@@ -23,7 +23,7 @@ Current fix ids:
 - `show-second-index`
 - `azerty-right-alt`
 
-Every candidate build also applies the base version patch documented in [docs/bugs/candidate-version-1.3.2.md](/home/sofian/Sources/ledger-passwords-show-second-repro/docs/bugs/candidate-version-1.3.2.md:1).
+Every candidate build also applies the base version patch documented in [docs/bugs/candidate-version-1.3.2.md](docs/bugs/candidate-version-1.3.2.md).
 
 Examples:
 
@@ -70,13 +70,13 @@ scripts/load-passwords-app-real-device.sh --fixes azerty-right-alt --model nanos
 
 ## Documentation
 
-- overview: [docs/overview.md](/home/sofian/Sources/ledger-passwords-show-second-repro/docs/overview.md:1)
-- reproduction and workflow: [docs/reproduction.md](/home/sofian/Sources/ledger-passwords-show-second-repro/docs/reproduction.md:1)
-- real-device installation: [docs/install-on-ledger.md](/home/sofian/Sources/ledger-passwords-show-second-repro/docs/install-on-ledger.md:1)
-- index bug root cause: [docs/root-cause.md](/home/sofian/Sources/ledger-passwords-show-second-repro/docs/root-cause.md:1)
-- index patch explanation: [docs/patch-explained.md](/home/sofian/Sources/ledger-passwords-show-second-repro/docs/patch-explained.md:1)
-- UI glyph issue: [docs/bugs/ui-show-glyph.md](/home/sofian/Sources/ledger-passwords-show-second-repro/docs/bugs/ui-show-glyph.md:1)
-- candidate version bump: [docs/bugs/candidate-version-1.3.2.md](/home/sofian/Sources/ledger-passwords-show-second-repro/docs/bugs/candidate-version-1.3.2.md:1)
-- `AZERTY Right Alt` bug: [docs/bugs/azerty-right-alt.md](/home/sofian/Sources/ledger-passwords-show-second-repro/docs/bugs/azerty-right-alt.md:1)
-- `AZERTY Right Alt` implementation plan: [docs/plans/azerty-right-alt-implementation-plan.md](/home/sofian/Sources/ledger-passwords-show-second-repro/docs/plans/azerty-right-alt-implementation-plan.md:1)
-- patch catalog: [patches/app-passwords/README.md](/home/sofian/Sources/ledger-passwords-show-second-repro/patches/app-passwords/README.md:1)
+- overview: [docs/overview.md](docs/overview.md)
+- reproduction and workflow: [docs/reproduction.md](docs/reproduction.md)
+- real-device installation: [docs/install-on-ledger.md](docs/install-on-ledger.md)
+- index bug root cause: [docs/root-cause.md](docs/root-cause.md)
+- index patch explanation: [docs/patch-explained.md](docs/patch-explained.md)
+- UI glyph issue: [docs/bugs/ui-show-glyph.md](docs/bugs/ui-show-glyph.md)
+- candidate version bump: [docs/bugs/candidate-version-1.3.2.md](docs/bugs/candidate-version-1.3.2.md)
+- `AZERTY Right Alt` bug: [docs/bugs/azerty-right-alt.md](docs/bugs/azerty-right-alt.md)
+- `AZERTY Right Alt` implementation plan: [docs/plans/azerty-right-alt-implementation-plan.md](docs/plans/azerty-right-alt-implementation-plan.md)
+- patch catalog: [patches/app-passwords/README.md](patches/app-passwords/README.md)
