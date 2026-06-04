@@ -1,59 +1,63 @@
-# Reproduction
+# Reproduction and Workflow
 
-## Commands
+## Build a Candidate Fixset
 
-Build:
-
-```bash
-./repro build
-```
-
-Full reproduction:
+Build upstream plus the selected candidate variant:
 
 ```bash
-./repro test
+./repro build --fixes show-second-index
+./repro build --fixes azerty-right-alt
+./repro build --fixes show-second-index,azerty-right-alt
 ```
 
-Install the patched app on a real Ledger:
+Candidate builds always include the base version bump to `Passwords 1.3.2`.
+
+The build manifest is written to:
+
+```text
+artifacts/build/manifest.json
+```
+
+## Run the Existing Speculos Regression Suite
 
 ```bash
-scripts/load-passwords-app-real-device.sh --model nanosp
+./repro test --fixes show-second-index
+./repro test --fixes azerty-right-alt
+./repro test --fixes show-second-index,azerty-right-alt
 ```
 
-## What `./repro build` does
+What this currently covers:
 
-- clones `LedgerHQ/app-passwords` at the pinned commit
-- prepares two worktrees under `artifacts/build/`
-- applies the patch to the `patched` variant
-- compiles both variants with the Ledger builder Docker image
+- the existing `show second` crash regression
+- non-regression of list-selection behavior when other fixes are applied
 
-## What `./repro test` does
+What it does not currently prove:
 
-- launches Speculos on `original`
-- runs the reproduction cases
-- relaunches Speculos on `patched`
-- reruns the same cases
-- generates a comparative Markdown + JSON report
+- real HID output for the `azerty-right-alt` fix
+- the UI arrow glyph rendering anomaly
 
-## Covered cases
+## Real-Device Validation
 
-1. control: one identifier pushed via APDU, `show first`
-2. main crash: two valid identifiers pushed via APDU, `show second`
-3. device-only proof: UI-only creation of two identifiers, `type second`, then `show second`
+Install a candidate build on a real Ledger:
 
-The automated `device-only` case uses `a` and `b` to stay stable with automatically driven Nano keyboard input. The bug still extends to the real-world `sofian terki` + `abc` scenario, because the root cause is a list-indexing error rather than nickname content.
+```bash
+scripts/load-passwords-app-real-device.sh --fixes show-second-index --model nanosp
+scripts/load-passwords-app-real-device.sh --fixes azerty-right-alt --model nanosp
+scripts/load-passwords-app-real-device.sh --fixes show-second-index,azerty-right-alt --model nanosp
+```
 
-## Outputs
+Use the physical device for:
 
-- Markdown report: `artifacts/reports/latest.md`
-- JSON report: `artifacts/reports/latest.json`
-- raw Speculos logs: `artifacts/logs/<run-id>/`
+- `AZERTY` HID validation
+- `show` glyph observation
 
-## Real-device install
+## Current Bug Documentation
 
-The Speculos reproduction flow and the real-device install flow are intentionally separate.
-
-- `./repro build` builds the pinned reproduction variants used by Speculos.
-- `scripts/load-passwords-app-real-device.sh` prepares a separate patched checkout and builds a real-device variant without `TESTING=1`.
-
-See `docs/install-on-ledger.md` for the real-device loading workflow.
+- index bug:
+  - `docs/root-cause.md`
+  - `docs/patch-explained.md`
+- UI glyph issue:
+  - `docs/bugs/ui-show-glyph.md`
+- `AZERTY Right Alt` issue:
+  - `docs/bugs/azerty-right-alt.md`
+  - `docs/plans/azerty-right-alt-implementation-plan.md`

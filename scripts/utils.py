@@ -16,6 +16,7 @@ class ReproError(RuntimeError):
 
 
 ROOT = Path(__file__).resolve().parents[1]
+FIX_CATALOG_PATH = ROOT / "patches" / "app-passwords" / "fix-catalog.json"
 
 
 def repo_root() -> Path:
@@ -24,6 +25,70 @@ def repo_root() -> Path:
 
 def load_lock() -> dict[str, Any]:
     return json.loads((ROOT / "repro.lock.json").read_text(encoding="utf-8"))
+
+
+def load_fix_catalog() -> dict[str, Any]:
+    return json.loads(FIX_CATALOG_PATH.read_text(encoding="utf-8"))
+
+
+def available_fixes() -> dict[str, dict[str, Any]]:
+    return load_fix_catalog()["fixes"]
+
+
+def default_candidate_fixes() -> tuple[str, ...]:
+    return tuple(load_fix_catalog()["default_candidate_fixes"])
+
+
+def candidate_base_patch_files() -> list[Path]:
+    catalog = load_fix_catalog().get("candidate_base", {})
+    patch_files: list[Path] = []
+    for relative in catalog.get("patch_files", []):
+        patch_path = (ROOT / relative).resolve()
+        if patch_path not in patch_files:
+            patch_files.append(patch_path)
+    return patch_files
+
+
+def candidate_base_docs() -> list[str]:
+    catalog = load_fix_catalog().get("candidate_base", {})
+    docs: list[str] = []
+    for relative in catalog.get("docs", []):
+        if relative not in docs:
+            docs.append(relative)
+    return docs
+
+
+def parse_fixes_arg(raw: str | None) -> tuple[str, ...]:
+    fixes = default_candidate_fixes() if raw is None else tuple(part.strip() for part in raw.split(",") if part.strip())
+    unknown = sorted(set(fixes) - set(available_fixes()))
+    if unknown:
+        raise ReproError(f"Unknown fixes: {', '.join(unknown)}")
+    return tuple(dict.fromkeys(fixes))
+
+
+def fix_slug(fixes: tuple[str, ...]) -> str:
+    return "none" if not fixes else "__".join(fixes)
+
+
+def resolve_patch_files(fixes: tuple[str, ...]) -> list[Path]:
+    catalog = available_fixes()
+    patch_files: list[Path] = list(candidate_base_patch_files())
+    for fix in fixes:
+        for relative in catalog[fix]["patch_files"]:
+            patch_path = (ROOT / relative).resolve()
+            if patch_path not in patch_files:
+                patch_files.append(patch_path)
+    return patch_files
+
+
+def resolve_fix_docs(fixes: tuple[str, ...]) -> list[str]:
+    catalog = available_fixes()
+    docs: list[str] = list(candidate_base_docs())
+    for fix in fixes:
+        for relative in catalog[fix].get("docs", []):
+            if relative not in docs:
+                docs.append(relative)
+    return docs
 
 
 def ensure_command(name: str) -> None:

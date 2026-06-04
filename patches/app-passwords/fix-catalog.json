@@ -1,0 +1,36 @@
+{
+  "candidate_base": {
+    "description": "Always applied to candidate builds so patched app-passwords variants identify as version 1.3.2.",
+    "patch_files": [
+      "patches/app-passwords/0000-bump-candidate-version-to-1.3.2.patch"
+    ],
+    "docs": [
+      "docs/bugs/candidate-version-1.3.2.md"
+    ]
+  },
+  "default_candidate_fixes": [
+    "show-second-index"
+  ],
+  "fixes": {
+    "show-second-index": {
+      "description": "Fix wrong absolute index recomputation in Passwords list on Nano / Speculos.",
+      "patch_files": [
+        "patches/app-passwords/0001-fix-show-second-index.patch"
+      ],
+      "docs": [
+        "docs/root-cause.md",
+        "docs/patch-explained.md"
+      ]
+    },
+    "azerty-right-alt": {
+      "description": "Use Right Alt / AltGr for AZERTY third-level HID characters instead of Left Alt.",
+      "patch_files": [
+        "patches/app-passwords/0002-use-right-alt-for-azerty-third-level.patch"
+      ],
+      "docs": [
+        "docs/bugs/azerty-right-alt.md",
+        "docs/plans/azerty-right-alt-implementation-plan.md"
+      ]
+    }
+  }
+}

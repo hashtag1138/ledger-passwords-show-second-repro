@@ -1,13 +1,25 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import argparse
 import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from speculos_harness import SpeculosHarness
-from utils import ReproError, ensure_dir, ensure_prereqs, free_port, load_lock, repo_root, utc_now_compact, write_json, write_text
+from utils import (
+    ReproError,
+    ensure_dir,
+    ensure_prereqs,
+    free_port,
+    load_lock,
+    parse_fixes_arg,
+    repo_root,
+    utc_now_compact,
+    write_json,
+    write_text,
+)
 
 
 @dataclass(frozen=True)
@@ -74,6 +86,12 @@ def classify_outcome(error: Exception | None, log_tail: str) -> str:
     return "error"
 
 
+def expected_outcome_for_variant(case: Case, variant: str, candidate_fixes: tuple[str, ...]) -> str:
+    if variant == "upstream":
+        return case.expected_original
+    return case.expected_patched if "show-second-index" in candidate_fixes else case.expected_original
+
+
 def run_case(
     *,
     case: Case,
@@ -86,6 +104,7 @@ def run_case(
     speculos_display: str,
     charset_mask: int,
     nickname_max_utf8_bytes: int,
+    candidate_fixes: tuple[str, ...],
 ) -> dict[str, Any]:
     case_log_path = log_root / f"{variant}__{case.case_id}.log"
     harness = SpeculosHarness(
@@ -98,7 +117,7 @@ def run_case(
         api_port=free_port(),
         log_path=case_log_path,
     )
-    expected_outcome = case.expected_original if variant == "original" else case.expected_patched
+    expected_outcome = expected_outcome_for_variant(case, variant, candidate_fixes)
     result: dict[str, Any] = {
         "variant": variant,
         "case_id": case.case_id,
@@ -152,24 +171,33 @@ def render_markdown_report(
     *,
     run_id: str,
     build_manifest: dict[str, Any],
-    lock: dict[str, Any],
     results: list[dict[str, Any]],
 ) -> str:
+    candidate_fixes = build_manifest["candidate_fixes"]
     lines = [
-        "# `show second` reproduction report",
+        "# `app-passwords` fixset regression report",
         "",
         f"- run id: `{run_id}`",
         f"- upstream repo: `{build_manifest['upstream_repo']}`",
         f"- upstream commit: `{build_manifest['upstream_commit']}`",
         f"- builder image: `{build_manifest['builder_image']}`",
         f"- speculos image: `{build_manifest['speculos_image']}`",
+        f"- candidate fixes: `{', '.join(candidate_fixes) if candidate_fixes else 'none'}`",
         "",
         "## Commands",
         "",
         "```bash",
-        "./repro build",
-        "./repro test",
+        "./repro build --fixes show-second-index",
+        "./repro build --fixes azerty-right-alt",
+        "./repro build --fixes show-second-index,azerty-right-alt",
+        "./repro test --fixes show-second-index",
         "```",
+        "",
+        "## Scope",
+        "",
+        "- this automated suite exercises the existing `show second` Speculos regression cases;",
+        "- it validates the candidate fix set against the upstream baseline;",
+        "- the `azerty-right-alt` bug still requires real-device HID validation outside Speculos.",
         "",
         "## Results",
         "",
@@ -210,22 +238,34 @@ def render_markdown_report(
         [
             "## Artifacts",
             "",
-            f"- build manifest: `artifacts/build/manifest.json`",
+            "- build manifest: `artifacts/build/manifest.json`",
+            f"- candidate slug: `{build_manifest['candidate_slug']}`",
+            f"- patch files: `{', '.join(build_manifest['patch_files'])}`",
             f"- JSON report: `artifacts/reports/run-{run_id}.json`",
             f"- Markdown report: `artifacts/reports/run-{run_id}.md`",
-            "",
-            "## Patch",
-            "",
-            "- patch file: `patches/app-passwords/0001-fix-show-second-index.patch`",
-            "- patch doc: `patches/app-passwords/README.md`",
-            "- root cause: `docs/root-cause.md`",
             "",
         ]
     )
     return "\n".join(lines)
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Run Speculos regression cases against upstream and the selected candidate fix set.",
+    )
+    parser.add_argument(
+        "--fixes",
+        default=None,
+        help=(
+            "Comma-separated fix ids expected in the build manifest. "
+            "If omitted, the manifest value is used."
+        ),
+    )
+    return parser.parse_args()
+
+
 def main() -> None:
+    args = parse_args()
     ensure_prereqs()
     root = repo_root()
     build_manifest_path = root / "artifacts" / "build" / "manifest.json"
@@ -234,13 +274,25 @@ def main() -> None:
 
     lock = load_lock()
     build_manifest = json.loads(build_manifest_path.read_text(encoding="utf-8"))
+    manifest_fixes = tuple(build_manifest["candidate_fixes"])
+    selected_fixes = parse_fixes_arg(args.fixes) if args.fixes is not None else manifest_fixes
+    if tuple(selected_fixes) != manifest_fixes:
+        raise ReproError(
+            "Build manifest fixes do not match requested fixes. "
+            f"manifest={manifest_fixes!r} requested={selected_fixes!r}. Run ./repro build --fixes ..."
+        )
+
     cases = load_cases(root / "cases" / "regression_cases.json")
     run_id = utc_now_compact()
     logs_dir = ensure_dir(root / "artifacts" / "logs" / run_id)
 
+    variants = {
+        "upstream": Path(build_manifest["variants"]["upstream"]["elf"]),
+        "candidate": Path(build_manifest["variants"]["candidate"]["elf"]),
+    }
+
     results: list[dict[str, Any]] = []
-    for variant, elf_key in (("original", "original_elf"), ("patched", "patched_elf")):
-        elf_path = Path(build_manifest[elf_key])
+    for variant, elf_path in variants.items():
         for case in cases:
             print("")
             print(f"[{variant}] {case.case_id}")
@@ -256,6 +308,7 @@ def main() -> None:
                     speculos_display=lock["speculos"]["display"],
                     charset_mask=int(lock["metadata_defaults"]["charset_mask"]),
                     nickname_max_utf8_bytes=int(lock["metadata_defaults"]["nickname_max_utf8_bytes"]),
+                    candidate_fixes=selected_fixes,
                 )
             )
 
@@ -274,7 +327,7 @@ def main() -> None:
 
     write_json(report_json, report)
     write_json(latest_json, report)
-    markdown = render_markdown_report(run_id=run_id, build_manifest=build_manifest, lock=lock, results=results)
+    markdown = render_markdown_report(run_id=run_id, build_manifest=build_manifest, results=results)
     write_text(report_md, markdown + "\n")
     write_text(latest_md, markdown + "\n")
 

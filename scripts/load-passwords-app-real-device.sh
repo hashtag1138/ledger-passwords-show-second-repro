@@ -3,11 +3,14 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOCK_FILE="${ROOT_DIR}/repro.lock.json"
-APP_DIR_DEFAULT="${ROOT_DIR}/artifacts/build/device-patched/app-passwords"
-PATCH_FILE_DEFAULT="${ROOT_DIR}/patches/app-passwords/0001-fix-show-second-index.patch"
+FIX_CATALOG="${ROOT_DIR}/patches/app-passwords/fix-catalog.json"
 
-APP_DIR="${APP_PASSWORDS_DIR:-$APP_DIR_DEFAULT}"
-PATCH_FILE="${APP_PASSWORDS_PATCH_FILE:-$PATCH_FILE_DEFAULT}"
+APP_DIR_INPUT="${APP_PASSWORDS_DIR:-}"
+APP_DIR=""
+FIXES_RAW="${APP_PASSWORDS_FIXES:-}"
+FIX_SLUG=""
+SELECTED_FIXES=()
+PATCH_FILES=()
 REPO_URL=""
 COMMIT=""
 IMAGE=""
@@ -23,11 +26,14 @@ Usage:
 
 Options:
   --dir PATH         app-passwords checkout/build directory.
-                     Default: artifacts/build/device-patched/app-passwords
+                     Default: artifacts/build/device-candidate-<fix-slug>/app-passwords
   --model MODEL      Target Ledger model. Default: nanosp
                      Supported: nanos, nanosp, stax, flex
-  --patch PATH       Patch file to apply before building.
-                     Default: patches/app-passwords/0001-fix-show-second-index.patch
+  --fixes IDS        Comma-separated fix ids to apply.
+                     Examples:
+                       show-second-index
+                       azerty-right-alt
+                       show-second-index,azerty-right-alt
   --no-build         Skip the build step and run only the load step.
   --sudo-docker      Prefix Docker commands with sudo.
   --force            Continue despite non-fatal safety checks.
@@ -53,8 +59,8 @@ while (($# > 0)); do
             MODEL="${2:-}"
             shift 2
             ;;
-        --patch)
-            PATCH_FILE="${2:-}"
+        --fixes)
+            FIXES_RAW="${2:-}"
             shift 2
             ;;
         --no-build)
@@ -80,9 +86,6 @@ while (($# > 0)); do
             ;;
     esac
 done
-
-APP_DIR="$(mkdir -p "$APP_DIR" && cd "$APP_DIR" && pwd)"
-PATCH_FILE="$(cd "$(dirname "$PATCH_FILE")" && pwd)/$(basename "$PATCH_FILE")"
 
 timestamp() {
     date '+%Y-%m-%d %H:%M:%S'
@@ -133,6 +136,55 @@ print(value)
 PY
 }
 
+resolve_selected_fixes() {
+    mapfile -t lines < <(python3 - "$FIX_CATALOG" "$FIXES_RAW" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+catalog_path = Path(sys.argv[1])
+raw = sys.argv[2]
+catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+available = catalog["fixes"]
+if raw:
+    fixes = [part.strip() for part in raw.split(",") if part.strip()]
+else:
+    fixes = list(catalog["default_candidate_fixes"])
+unknown = sorted(set(fixes) - set(available))
+if unknown:
+    raise SystemExit(f"Unknown fixes: {', '.join(unknown)}")
+fixes = list(dict.fromkeys(fixes))
+slug = "none" if not fixes else "__".join(fixes)
+print(f"SLUG:{slug}")
+for fix in fixes:
+    print(f"FIX:{fix}")
+for relative in catalog.get("candidate_base", {}).get("patch_files", []):
+    print(f"PATCH:{catalog_path.parent.parent.parent / relative}")
+for fix in fixes:
+    for relative in available[fix]["patch_files"]:
+        print(f"PATCH:{catalog_path.parent.parent.parent / relative}")
+PY
+)
+
+    SELECTED_FIXES=()
+    PATCH_FILES=()
+    FIX_SLUG=""
+    local line
+    for line in "${lines[@]}"; do
+        case "$line" in
+            SLUG:*)
+                FIX_SLUG="${line#SLUG:}"
+                ;;
+            FIX:*)
+                SELECTED_FIXES+=("${line#FIX:}")
+                ;;
+            PATCH:*)
+                PATCH_FILES+=("${line#PATCH:}")
+                ;;
+        esac
+    done
+}
+
 model_to_sdk_env() {
     case "$1" in
         nanos)
@@ -162,17 +214,29 @@ ensure_prereqs() {
     command -v docker >/dev/null 2>&1 || fail "docker is required"
     command -v python3 >/dev/null 2>&1 || fail "python3 is required"
     [[ -f "$LOCK_FILE" ]] || fail "Missing lock file: $LOCK_FILE"
-    [[ -f "$PATCH_FILE" ]] || fail "Patch file not found: $PATCH_FILE"
+    [[ -f "$FIX_CATALOG" ]] || fail "Missing fix catalog: $FIX_CATALOG"
     run_cmd "${DOCKER_PREFIX[@]}" docker version >/dev/null
 
     REPO_URL="$(read_lock_value "data['app_passwords']['repo']")"
     COMMIT="$(read_lock_value "data['app_passwords']['commit']")"
     IMAGE="$(read_lock_value "data['docker_images']['builder']")"
+    resolve_selected_fixes
+    if [[ -z "$APP_DIR_INPUT" ]]; then
+        APP_DIR="${ROOT_DIR}/artifacts/build/device-candidate-${FIX_SLUG}/app-passwords"
+    else
+        APP_DIR="$APP_DIR_INPUT"
+    fi
+    APP_DIR="$(mkdir -p "$APP_DIR" && cd "$APP_DIR" && pwd)"
+    local patch_file
+    for patch_file in "${PATCH_FILES[@]}"; do
+        [[ -f "$patch_file" ]] || fail "Patch file not found: $patch_file"
+    done
 
     info "Root dir: $ROOT_DIR"
     info "Lock file: $LOCK_FILE"
     info "App dir: $APP_DIR"
-    info "Patch file: $PATCH_FILE"
+    info "Selected fixes: ${SELECTED_FIXES[*]}"
+    info "Fix slug: $FIX_SLUG"
     info "Pinned repo: $REPO_URL"
     info "Pinned commit: $COMMIT"
     info "Docker image: $IMAGE"
@@ -180,7 +244,7 @@ ensure_prereqs() {
 }
 
 prepare_checkout() {
-    section "Preparing patched checkout"
+    section "Preparing candidate checkout"
     if [[ ! -d "$APP_DIR/.git" ]]; then
         info "No checkout found, cloning app-passwords"
         rm -rf "$APP_DIR"
@@ -190,10 +254,13 @@ prepare_checkout() {
     run_cmd git -C "$APP_DIR" fetch --tags origin
     run_cmd git -C "$APP_DIR" checkout --force "$COMMIT"
     run_cmd git -C "$APP_DIR" clean -fdx
-    run_cmd git -C "$APP_DIR" apply "$PATCH_FILE"
+    local patch_file
+    for patch_file in "${PATCH_FILES[@]}"; do
+        run_cmd git -C "$APP_DIR" apply "$patch_file"
+    done
 
     info "Git HEAD: $(git -C "$APP_DIR" rev-parse --short HEAD)"
-    info "Patch applied from: $PATCH_FILE"
+    info "Applied fixes: ${SELECTED_FIXES[*]}"
 }
 
 detect_ledger_usb() {
@@ -244,16 +311,9 @@ print_app_debug() {
         fi
     fi
 
-    if grep -q 'selector_callback(index);' "$APP_DIR/src/ui/ui_passwords.c"; then
-        info "Patched callback pattern detected in src/ui/ui_passwords.c"
-    else
-        warn "Patched callback pattern not found in src/ui/ui_passwords.c"
-        if ((FORCE)); then
-            warn "Continuing because --force was provided"
-        else
-            fail "Patched callback pattern not detected"
-        fi
-    fi
+    info "Selected fixes: ${SELECTED_FIXES[*]}"
+    info "Working tree diffstat against pinned upstream:"
+    git -C "$APP_DIR" diff --stat || true
 }
 
 docker_tty_args() {
@@ -337,8 +397,8 @@ main() {
     load_app "$sdk_env"
 
     section "Done"
-    info "If the load succeeded, the patched Passwords app is now installed on the Ledger."
-    info "Next step: open Passwords on the device and validate the fixed scenario."
+    info "If the load succeeded, the candidate Passwords app is now installed on the Ledger."
+    info "Next step: open Passwords on the device and validate the selected fixes."
 }
 
 main "$@"

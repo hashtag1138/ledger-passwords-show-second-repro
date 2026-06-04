@@ -1,0 +1,69 @@
+diff --git a/src/hid_mapping.c b/src/hid_mapping.c
+index 4c4f8e9..beba58a 100644
+--- a/src/hid_mapping.c
++++ b/src/hid_mapping.c
+@@ -165,6 +165,13 @@ static uint8_t get_char(uint8_t index, hid_mapping_t mapping) {
+     return (mapping == HID_MAPPING_AZERTY ? MAP[index].azerty : MAP[index].qwerty);
+ }
+ 
++static uint8_t get_alt_modifier(hid_mapping_t mapping, bool altUsed) {
++    if (!altUsed) {
++        return 0x00;
++    }
++    return (mapping == HID_MAPPING_AZERTY ? RIGHT_ALT_KEY : ALT_KEY);
++}
++
+ void map_char(hid_mapping_t mapping, uint8_t key, uint8_t *out) {
+     uint8_t keyDiv8, twoPower, keyCode;
+     bool altUsed, shiftUsed;
+@@ -181,7 +188,7 @@ void map_char(hid_mapping_t mapping, uint8_t key, uint8_t *out) {
+     altUsed = ((get_char(keyDiv8, mapping) & twoPower) != 0);
+     shiftUsed = ((get_char(MOD_MASK_LENGTH + keyDiv8, mapping) & twoPower) != 0);
+     keyCode = get_char(MOD2_MASK_LENGTH + key, mapping);
+-    out[0] = (altUsed ? ALT_KEY : 0x00) | (shiftUsed ? SHIFT_KEY : 0x00);
++    out[0] = get_alt_modifier(mapping, altUsed) | (shiftUsed ? SHIFT_KEY : 0x00);
+     out[1] = 0x00;
+     out[2] = keyCode;
+ }
+diff --git a/src/hid_mapping.h b/src/hid_mapping.h
+index 58b02f4..1c51dff 100644
+--- a/src/hid_mapping.h
++++ b/src/hid_mapping.h
+@@ -20,6 +20,7 @@
+ #define HID_MAPPING_H
+ #define SHIFT_KEY 0x02
+ #define ALT_KEY   0x04
++#define RIGHT_ALT_KEY 0x40
+ 
+ #include <stdint.h>
+ 
+diff --git a/tests/unit/test_hid_mapping.c b/tests/unit/test_hid_mapping.c
+index 688dc21..8e8563b 100644
+--- a/tests/unit/test_hid_mapping.c
++++ b/tests/unit/test_hid_mapping.c
+@@ -90,9 +90,23 @@ static void test_map_char_azerty_shift(void **state __attribute__((unused))) {
+ static void test_map_char_azerty_alt(void **state __attribute__((unused))) {
+     uint8_t map[3] = {0, 0, 0};
+     map_char(HID_MAPPING_AZERTY, '@', map);
+-    check_map(map, ALT_KEY, 0x27);
++    check_map(map, RIGHT_ALT_KEY, 0x27);
+     map_char(HID_MAPPING_AZERTY, '`', map);
+-    check_map(map, ALT_KEY, 0x24);
++    check_map(map, RIGHT_ALT_KEY, 0x24);
++    map_char(HID_MAPPING_AZERTY, '[', map);
++    check_map(map, RIGHT_ALT_KEY, 0x22);
++    map_char(HID_MAPPING_AZERTY, '\\', map);
++    check_map(map, RIGHT_ALT_KEY, 0x25);
++    map_char(HID_MAPPING_AZERTY, ']', map);
++    check_map(map, RIGHT_ALT_KEY, 0x2d);
++    map_char(HID_MAPPING_AZERTY, '{', map);
++    check_map(map, RIGHT_ALT_KEY, 0x21);
++    map_char(HID_MAPPING_AZERTY, '|', map);
++    check_map(map, RIGHT_ALT_KEY, 0x23);
++    map_char(HID_MAPPING_AZERTY, '}', map);
++    check_map(map, RIGHT_ALT_KEY, 0x2e);
++    map_char(HID_MAPPING_AZERTY, '~', map);
++    check_map(map, RIGHT_ALT_KEY, 0x1f);
+ }
+ 
+ int main() {

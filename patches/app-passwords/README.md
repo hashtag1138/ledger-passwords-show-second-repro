@@ -1,38 +1,80 @@
-# `show second` patch
+# `app-passwords` Patch Catalog
 
-## File
+This repository applies patches to the upstream `LedgerHQ/app-passwords` checkout selected by [repro.lock.json](/home/sofian/Sources/ledger-passwords-show-second-repro/repro.lock.json:1).
 
-- patch: `0001-fix-show-second-index.patch`
+The catalog driving fix selection is:
 
-## What the patch does
+- [patches/app-passwords/fix-catalog.json](/home/sofian/Sources/ledger-passwords-show-second-repro/patches/app-passwords/fix-catalog.json:1)
 
-The patch fixes item selection in `Passwords list` on Nano / Speculos.
+## Always-Applied Candidate Patch
 
-Before:
+Every candidate build also applies:
 
-- `password_callback()` recomputed an absolute index with `page * nbPasswordsPerPage + index`
+- [0000-bump-candidate-version-to-1.3.2.patch](/home/sofian/Sources/ledger-passwords-show-second-repro/patches/app-passwords/0000-bump-candidate-version-to-1.3.2.patch:1)
 
-After:
+Purpose:
 
-- `password_callback()` passes `index` directly
+- distinguish patched candidates from upstream `1.3.1`
+- let the companion require `Passwords >= 1.3.2` before real hardware writes
 
-## Why
+Doc:
 
-On Nano, the `CHOICES_LIST` callback already receives the absolute index of the selected item. The recomputation therefore applied a second translation.
+- [docs/bugs/candidate-version-1.3.2.md](/home/sofian/Sources/ledger-passwords-show-second-repro/docs/bugs/candidate-version-1.3.2.md:1)
 
-Effect on a two-entry list:
+## Available Fixes
 
-- first item: `0` -> OK
-- second item: `2` -> out of bounds
+### `show-second-index`
 
-That was enough to make `show_password_cb()` read an invalid pointer and eventually crash with `signal 11`.
+Patch:
 
-## How to apply it manually
+- [0001-fix-show-second-index.patch](/home/sofian/Sources/ledger-passwords-show-second-repro/patches/app-passwords/0001-fix-show-second-index.patch:1)
 
-From a `LedgerHQ/app-passwords` checkout at the commit pinned by `repro.lock.json`:
+Purpose:
+
+- fix wrong absolute index recomputation in `Passwords list`
+
+Docs:
+
+- [docs/root-cause.md](/home/sofian/Sources/ledger-passwords-show-second-repro/docs/root-cause.md:1)
+- [docs/patch-explained.md](/home/sofian/Sources/ledger-passwords-show-second-repro/docs/patch-explained.md:1)
+
+### `azerty-right-alt`
+
+Patch:
+
+- [0002-use-right-alt-for-azerty-third-level.patch](/home/sofian/Sources/ledger-passwords-show-second-repro/patches/app-passwords/0002-use-right-alt-for-azerty-third-level.patch:1)
+
+Purpose:
+
+- use `Right Alt` / `AltGr` for `AZERTY` third-level HID characters instead of `Left Alt`
+
+Docs:
+
+- [docs/bugs/azerty-right-alt.md](/home/sofian/Sources/ledger-passwords-show-second-repro/docs/bugs/azerty-right-alt.md:1)
+- [docs/plans/azerty-right-alt-implementation-plan.md](/home/sofian/Sources/ledger-passwords-show-second-repro/docs/plans/azerty-right-alt-implementation-plan.md:1)
+
+## Build Examples
+
+Build only the existing list-index fix:
 
 ```bash
-git apply patches/app-passwords/0001-fix-show-second-index.patch
+./repro build --fixes show-second-index
 ```
 
-The repository applies this patch automatically in `./repro build`.
+Build only the `AZERTY Right Alt` fix:
+
+```bash
+./repro build --fixes azerty-right-alt
+```
+
+Build both fixes together:
+
+```bash
+./repro build --fixes show-second-index,azerty-right-alt
+```
+
+## Real-Device Install Example
+
+```bash
+scripts/load-passwords-app-real-device.sh --fixes show-second-index,azerty-right-alt --model nanosp
+```

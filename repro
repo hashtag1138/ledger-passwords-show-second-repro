@@ -6,15 +6,15 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 usage() {
     cat <<'EOF'
 Usage:
-  ./repro build
-  ./repro test
-  ./repro all
+  ./repro build [--fixes <fix1[,fix2...]>]
+  ./repro test [--fixes <fix1[,fix2...]>]
+  ./repro all [--fixes <fix1[,fix2...]>]
   ./repro clean
 
 Commands:
-  build   Clone upstream app-passwords at the pinned commit, build original and patched variants.
-  test    Run the full regression suite on original and patched variants via Speculos.
-  all     Run build, then test.
+  build   Clone upstream app-passwords at the pinned commit, build upstream and candidate fixset variants.
+  test    Run the Speculos regression suite on upstream and the selected candidate fixset.
+  all     Run build, then test, with the same fix selection.
   clean   Remove generated build, log, and report artifacts.
 EOF
 }
@@ -33,7 +33,7 @@ case "$command_name" in
         ;;
     all)
         python3 "$ROOT_DIR/scripts/build.py" "$@"
-        exec python3 "$ROOT_DIR/scripts/test.py"
+        exec python3 "$ROOT_DIR/scripts/test.py" "$@"
         ;;
     clean)
         rm -rf "$ROOT_DIR/artifacts/build"/*
